@@ -26,7 +26,7 @@ router.post(
   [
     check('name', 'Bạn phải nhập tên').not().isEmpty(),
     check('email', 'Bạn phải nhập đúng định dạng email').isEmail(),
-    check('password', 'Mật khẩu phải nhiều hơn 8 ký tự').isLength({ min: 6 }),
+    check('password', 'Mật khẩu phải nhiều hơn 8 ký tự').isLength({ min: 8 }),
   ],
   register,
 );
