@@ -5,6 +5,8 @@ const {
   register,
   confirmationEmail,
   login,
+  forgotPassword,
+  resetPassword,
 } = require('../../controllers/restaurantManager/auth.controller');
 
 const router = express.Router();
@@ -47,6 +49,29 @@ router.post(
     ).isLength({ min: 8, max: 30 }),
   ],
   login,
+);
+
+// @route   POST api/restaurantManager/auth/forgotPassword
+// @desc    Quên mật khẩu
+// @access  Public
+router.post(
+  '/forgotPassword',
+  [check('email', 'Bạn phải nhập đúng định dạng email').isEmail()],
+  forgotPassword,
+);
+
+// @route   POST api/restaurantManager/auth/resetPassword
+// @desc    Reset mật khẩu
+// @access  Public
+router.post(
+  '/resetPassword/:resetToken',
+  [
+    check(
+      'password',
+      'Mật khẩu phải có ít nhất 8 ký tự và không quá 30 ký tự',
+    ).isLength({ min: 8, max: 30 }),
+  ],
+  resetPassword,
 );
 
 module.exports = router;
