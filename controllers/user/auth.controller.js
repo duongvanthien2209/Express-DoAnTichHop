@@ -67,12 +67,12 @@ exports.login = async (req, res, next) => {
     return res.status(400).json({ errors: errors.array() });
   }
 
-  const { userName, password } = req.body;
+  const { username, password } = req.body;
 
   // console.log(req.body);
 
   try {
-    const user = await User.findOne({ name: userName });
+    const user = await User.findOne({ name: username });
 
     if (!user) {
       throw new Error('Bạn nhập sai tên đăng nhập');

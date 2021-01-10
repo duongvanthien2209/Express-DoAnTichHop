@@ -27,7 +27,7 @@ router.get('/find', find);
 router.post(
   '/login',
   [
-    check('userName', 'Bạn phải nhập tên đăng nhập').not().isEmpty(),
+    check('username', 'Bạn phải nhập tên đăng nhập').not().isEmpty(),
     check('password', 'Mật khẩu phải nhiều hơn 8 ký tự').isLength({ min: 6 }),
   ],
   login,
