@@ -72,10 +72,10 @@ exports.login = async (req, res, next) => {
   // console.log(req.body);
 
   try {
-    const user = await User.findOne({ userName });
+    const user = await User.findOne({ name: userName });
 
     if (!user) {
-      throw new Error('Email chưa được đăng ký');
+      throw new Error('Bạn nhập sai tên đăng nhập');
     }
 
     // Result: boolean
