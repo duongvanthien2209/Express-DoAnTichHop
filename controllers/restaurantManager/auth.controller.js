@@ -42,7 +42,7 @@ exports.register = async (req, res, next) => {
 
     if (!restaurantType) throw new Error('Loại hình không tồn tại');
 
-    const salt = await bcrypt.salt(10);
+    const salt = await bcrypt.genSalt(10);
     restaurant = await Restaurant.create({
       tenNhaHang,
       email,
@@ -66,9 +66,11 @@ exports.register = async (req, res, next) => {
     // Send email
     const tokenUrl = `<a href="${req.protocol}://${req.get(
       'host',
-    )}/confirmation/${token}">${req.protocol}://${req.get(
+    )}/api/restaurantManager/auth/confirmationEmail/${token}">${
+      req.protocol
+    }://${req.get(
       'host',
-    )}/confirmation/${token}</a>`;
+    )}/api/restaurantManager/auth/confirmationEmail/${token}</a>`;
 
     const message = `<p>Xin chao ${restaurant.tenNhaHang},</p><p>Bạn cần phải xác mình chủ cửa hàng bằng đường link sau:</p><p>${tokenUrl}</p>`;
 
@@ -130,7 +132,7 @@ exports.login = async (req, res, next) => {
     if (!result) throw new Error('Sai mật khẩu');
 
     const payload = {
-      restaurant: restaurant.id,
+      restaurantManager: { id: restaurant.id },
     };
 
     jwt.sign(
@@ -147,5 +149,107 @@ exports.login = async (req, res, next) => {
   } catch (error) {
     console.log(error.message);
     return next(error);
+  }
+};
+
+exports.forgotPassword = async (req, res, next) => {
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
+  const { email } = req.body;
+
+  try {
+    const restaurant = await Restaurant.findOne({ email });
+
+    if (!restaurant) throw new Error('Email không tồn tại trong hệ thống.');
+
+    // Create password reset token
+    const resetToken = crypto.randomBytes(16).toString('hex');
+
+    await Token.create({
+      restaurant: restaurant._id,
+      email,
+      token: crypto.createHash('sha256').update(resetToken).digest('hex'),
+      tokenExpire: Date.now() + 24 * 60 * 60 * 1000,
+    });
+
+    // Send email
+    const tokenUrl = `<a href="${req.protocol}://${req.get(
+      'host',
+    )}/restaurantManager/confirmationForgotPassword/${resetToken}">${
+      req.protocol
+    }://${req.get(
+      'host',
+    )}/restaurantManager/confirmationForgotPassword/${resetToken}</a>`;
+
+    const message = `<p>Bạn cần truy cập vào link sau để xác nhận tài khoản:</p><p>${tokenUrl}</p>`;
+    await sendEmail({
+      email,
+      subject: 'Forgot Password - restaurantManager',
+      message,
+    });
+
+    return Response.success(res, {
+      message: 'Email reset password đã được gởi',
+      token: resetToken,
+    });
+  } catch (error) {
+    console.log(error);
+    return next(error);
+  }
+};
+
+exports.resetPassword = async (req, res, next) => {
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
+  const resetToken = crypto
+    .createHash('sha256')
+    .update(req.params.resetToken)
+    .digest('hex');
+
+  try {
+    const token = await Token.findOne({
+      token: resetToken,
+      tokenExpire: { $gt: Date.now() },
+    });
+
+    if (!token) throw new Error('Token không hợp lệ');
+
+    // Cập nhật lại mật khẩu
+    const salt = await bcrypt.genSalt(10);
+    const restaurant = await Restaurant.findByIdAndUpdate(token.restaurant, {
+      password: await bcrypt.hash(req.body.password, salt),
+    });
+
+    // Xóa token
+    await Token.findByIdAndDelete(token._id);
+
+    const payload = {
+      restaurantManager: {
+        id: restaurant.id,
+      },
+    };
+
+    jwt.sign(
+      payload,
+      process.env.JWT_SECRET,
+      { expiresIn: 360000 },
+      (err, currentToken) => {
+        if (err) return next(err);
+        return Response.success(res, { currentToken });
+      },
+    );
+
+    return true;
+  } catch (error) {
+    console.log(error);
+    return next(new Error('Có lỗi xảy ra'));
   }
 };

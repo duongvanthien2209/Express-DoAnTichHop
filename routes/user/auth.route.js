@@ -4,7 +4,22 @@ const { check } = require('express-validator');
 
 const router = express.Router();
 
-const { login, register } = require('../../controllers/user/auth.controller');
+const {
+  login,
+  register,
+  getAll,
+  find,
+} = require('../../controllers/user/auth.controller');
+
+// @route   POST api/user/auth
+// @desc    Danh sách người dùng
+// @access  Public
+router.get('/', getAll);
+
+// @route   POST api/user/auth/find
+// @desc    Tìm kiếm người dùng
+// @access  Public
+router.get('/find', find);
 
 // @route   POST api/user/auth/login
 // @desc    Đăng nhập
