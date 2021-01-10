@@ -67,12 +67,12 @@ exports.login = async (req, res, next) => {
     return res.status(400).json({ errors: errors.array() });
   }
 
-  const { name, password } = req.body;
+  const { userName, password } = req.body;
 
-  console.log(req.body);
+  // console.log(req.body);
 
   try {
-    const user = await User.findOne({ name });
+    const user = await User.findOne({ userName });
 
     if (!user) {
       throw new Error('Email chưa được đăng ký');

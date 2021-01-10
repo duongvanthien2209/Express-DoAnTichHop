@@ -8,4 +8,8 @@ router.use('/auth', require('./restaurantManager/auth.route'));
 
 router.use(handleError);
 
+router.use('/food', require('./food.route'));
+
+router.use(handleError);
+
 module.exports = router;
