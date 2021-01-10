@@ -12,7 +12,7 @@ const { login, register } = require('../../controllers/user/auth.controller');
 router.post(
   '/login',
   [
-    check('email', 'Bạn phải nhập đúng định dạng email.').isEmail(),
+    check('name', 'Bạn phải nhập tên đăng nhập').not().isEmpty(),
     check('password', 'Mật khẩu phải nhiều hơn 8 ký tự').isLength({ min: 6 }),
   ],
   login,
