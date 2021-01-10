@@ -12,6 +12,53 @@ const Token = require('../../models/Token');
 const sendEmail = require('../../utils/sendEmail');
 const Response = require('../../helpers/response.helper');
 
+const limit = 20;
+
+exports.getAll = async (req, res, next) => {
+  let { q } = req.query;
+
+  try {
+    q = parseInt(q, 10);
+    const total = await User.find().count();
+
+    const users = await User.find()
+      .skip((q - 1) * limit)
+      .limit(limit);
+
+    if (!users) throw new Error('Có lỗi xảy ra');
+
+    return Response.success(res, { users, total });
+  } catch (error) {
+    console.log(error);
+    return next(error);
+  }
+};
+
+exports.find = async (req, res, next) => {
+  let { q } = req.query;
+  const { name } = req.query;
+
+  try {
+    q = parseInt(q, 10);
+
+    const total = await User.find({
+      $where: `this.fullName.toLowerCase().indexOf('${name.toLowerCase()}') > -1`,
+    }).count();
+    const users = await User.find({
+      $where: `this.fullName.toLowerCase().indexOf('${name.toLowerCase()}') > -1`,
+    })
+      .skip((q - 1) * limit)
+      .limit(limit);
+
+    if (!users) throw new Error('Có lỗi xảy ra');
+
+    return Response.success(res, { users, total });
+  } catch (error) {
+    console.log(error);
+    return next(error);
+  }
+};
+
 exports.login = async (req, res, next) => {
   // Validate
   const errors = validationResult(req);
@@ -20,10 +67,10 @@ exports.login = async (req, res, next) => {
     return res.status(400).json({ errors: errors.array() });
   }
 
-  const { email, password } = req.body;
+  const { name, password } = req.body;
 
   try {
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ name });
 
     if (!user) {
       throw new Error('Email chưa được đăng ký');
@@ -66,13 +113,19 @@ exports.register = async (req, res, next) => {
     return res.status(400).json({ errors: errors.array() });
   }
 
-  const { name, email, password } = req.body;
+  const { name, email, password, SDT, diaChi, fullName } = req.body;
 
   try {
     let user = await User.findOne({ email });
 
     if (user) {
       throw new Error('Email đã tồn tại');
+    } else user = null;
+
+    user = await User.findOne({ name });
+
+    if (user) {
+      throw new Error('Tên đăng nhập đã tồn tại');
     }
 
     // Tạo ra salt mã hóa
@@ -81,6 +134,9 @@ exports.register = async (req, res, next) => {
       name,
       email,
       password: await bcrypt.hash(password, salt),
+      SDT,
+      diaChi,
+      fullName,
     });
 
     // Tạo 1 token -> lưu lại -> gởi email + token -> email gởi lại token hợp lệ -> verified user
