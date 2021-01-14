@@ -23,6 +23,26 @@ const UserSchema = new mongoose.Schema({
     unique: true,
   },
 
+  ngaySinh: {
+    type: Date,
+    required: true,
+  },
+
+  avatar: {
+    type: String,
+    default: 'https://picsum.photos/200',
+  },
+
+  CMND: {
+    type: String,
+    required: true,
+  },
+
+  gioiTinh: {
+    type: Boolean,
+    required: true,
+  },
+
   email: {
     type: String,
     required: true,

@@ -19,10 +19,12 @@ const FoodSchema = new mongoose.Schema({
   },
   loai: {
     type: mongoose.Schema.Types.ObjectId,
+    ref: 'FoodType',
     required: true,
   },
   nhaHang: {
     type: mongoose.Schema.Types.ObjectId,
+    ref: 'Restaurant',
     required: true,
   },
   dateCreate: {

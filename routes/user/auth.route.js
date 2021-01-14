@@ -39,9 +39,15 @@ router.post(
 router.post(
   '/register',
   [
-    check('name', 'Bạn phải nhập tên').not().isEmpty(),
+    check('username', 'Bạn phải nhập tên').not().isEmpty(),
     check('email', 'Bạn phải nhập đúng định dạng email').isEmail(),
     check('password', 'Mật khẩu phải nhiều hơn 8 ký tự').isLength({ min: 8 }),
+    check('fullname', 'Bạn phải nhập họ tên').not().isEmpty(),
+    check('diaChi', 'Bạn phải nhập địa chỉ').not().isEmpty(),
+    check('SDT', 'Bạn phải nhập số điện thoại').not().isEmpty(),
+    check('gioiTinh', 'Bạn phải chọn giới tính').not().isEmpty(),
+    check('CMND', 'Bạn phải nhập số CMND').not().isEmpty(),
+    check('ngaySinh', 'Bạn phải nhập ngày sinh').not().isEmpty(),
   ],
   register,
 );

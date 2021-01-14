@@ -3,6 +3,9 @@ const bcrypt = require('bcrypt');
 const Restaurant = require('./models/Restaurant');
 const RestaurantType = require('./models/RestaurantType');
 const FoodType = require('./models/FoodType');
+const Comment = require('./models/Comment');
+const User = require('./models/User');
+const Star = require('./models/Star');
 
 // const restaurant = {
 //   tenNhaHang: '',
@@ -46,6 +49,28 @@ exports.add = async (
 
 exports.add1 = async (tenLoai) => {
   await FoodType.create({ tenLoai });
+};
+
+exports.add2 = async (text, userId, restaurantId) => {
+  const user = await User.findById(userId);
+  const restaurant = await Restaurant.findById(restaurantId);
+
+  await Comment.create({
+    chiTiet: text,
+    nhaHang: restaurant._id,
+    khachHang: user._id,
+  });
+};
+
+exports.add3 = async (soLuong, userId, restaurantId) => {
+  const user = await User.findById(userId);
+  const restaurant = await Restaurant.findById(restaurantId);
+
+  await Star.create({
+    soLuong,
+    nhaHang: restaurant._id,
+    khachHang: user._id,
+  });
 };
 
 // add(

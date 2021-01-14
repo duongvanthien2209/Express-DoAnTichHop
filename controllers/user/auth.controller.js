@@ -115,7 +115,17 @@ exports.register = async (req, res, next) => {
     return res.status(400).json({ errors: errors.array() });
   }
 
-  const { name, email, password, SDT, diaChi, fullName } = req.body;
+  const {
+    username,
+    email,
+    password,
+    SDT,
+    diaChi,
+    fullName,
+    gioiTinh,
+    ngaySinh,
+    CMND,
+  } = req.body;
 
   try {
     let user = await User.findOne({ email });
@@ -124,7 +134,7 @@ exports.register = async (req, res, next) => {
       throw new Error('Email đã tồn tại');
     } else user = null;
 
-    user = await User.findOne({ name });
+    user = await User.findOne({ name: username });
 
     if (user) {
       throw new Error('Tên đăng nhập đã tồn tại');
@@ -133,12 +143,15 @@ exports.register = async (req, res, next) => {
     // Tạo ra salt mã hóa
     const salt = await bcrypt.genSalt(10);
     user = await User.create({
-      name,
+      name: username,
       email,
       password: await bcrypt.hash(password, salt),
       SDT,
       diaChi,
       fullName,
+      gioiTinh,
+      CMND,
+      ngaySinh: new Date(ngaySinh),
     });
 
     // Tạo 1 token -> lưu lại -> gởi email + token -> email gởi lại token hợp lệ -> verified user
