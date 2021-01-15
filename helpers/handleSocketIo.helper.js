@@ -1,7 +1,9 @@
 const socketIo = require('socket.io');
 
-function handleSocketIo(server) {
-  const io = socketIo(server, {
+let io;
+
+const handleSocketIo = (server) => {
+  io = socketIo(server, {
     cors: {
       origin: 'http://localhost:3000',
       methods: ['GET', 'POST'],
@@ -15,6 +17,6 @@ function handleSocketIo(server) {
       console.log('User has left');
     });
   });
-}
+};
 
-module.exports = handleSocketIo;
+module.exports = { handleSocketIo, io };
