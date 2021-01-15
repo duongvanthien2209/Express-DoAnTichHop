@@ -1,22 +1,24 @@
+const express = require('express');
 const socketIo = require('socket.io');
 
-let io;
+const app = express();
+const http = require('http');
 
-const handleSocketIo = (server) => {
-  io = socketIo(server, {
-    cors: {
-      origin: 'http://localhost:3000',
-      methods: ['GET', 'POST'],
-    },
+const server = http.createServer(app);
+
+const io = socketIo(server, {
+  cors: {
+    origin: 'http://localhost:3000',
+    methods: ['GET', 'POST'],
+  },
+});
+
+io.on('connection', (socket) => {
+  console.log('Has connection');
+
+  socket.on('disconnect', () => {
+    console.log('User has left');
   });
+});
 
-  io.on('connection', (socket) => {
-    console.log('Has connection');
-
-    socket.on('disconnect', () => {
-      console.log('User has left');
-    });
-  });
-};
-
-module.exports = { handleSocketIo, io };
+module.exports = { app, server, io };

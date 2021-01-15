@@ -1,4 +1,4 @@
-const { io } = require('../helpers/handleSocketIo.helper');
+const { io } = require('../index1');
 
 exports.example = () => {
   console.log(io);
