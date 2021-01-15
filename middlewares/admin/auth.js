@@ -7,6 +7,7 @@ exports.protect = async (req, res, next) => {
   const token = req.body.token || req.query.token || req.headers.authorization;
 
   try {
+    if (!token) throw new Error('Không tìm thấy token');
     const decode = jwt.verify(token.split(' ')[1], process.env.JWT_SECRET);
 
     if (decode.admin.name !== process.env.ADMIN_NAME)
@@ -23,6 +24,6 @@ exports.protect = async (req, res, next) => {
     return next();
   } catch (error) {
     console.log(error);
-    return Response.error(error);
+    return Response.error(res, { message: error.message });
   }
 };

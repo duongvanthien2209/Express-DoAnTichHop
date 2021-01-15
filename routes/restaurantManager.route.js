@@ -11,6 +11,12 @@ router.use(handleError);
 
 router.use(protect);
 
+router.use(handleError);
+
+router.use('/mail', require('./restaurantManager/mail.route'));
+
+router.use(handleError);
+
 router.use('/comment', require('./restaurantManager/comment.route'));
 
 router.use(handleError);

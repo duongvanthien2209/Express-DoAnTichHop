@@ -184,3 +184,61 @@ exports.register = async (req, res, next) => {
     return next(error);
   }
 };
+
+exports.update = async (req, res, next) => {
+  // Validate
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
+  const { user } = req;
+  const { ngaySinh } = req.body;
+  try {
+    const currentUser = await User.findByIdAndUpdate(user._id, {
+      $set: { ...req.body, ngaySinh: new Date(ngaySinh) },
+    });
+    if (!currentUser) throw new Error('Có lỗi xảy ra');
+    return Response.success(res, { message: 'Cập nhật thành công' });
+  } catch (error) {
+    console.log(error);
+    return next(error);
+  }
+};
+
+exports.updatePassword = async (req, res, next) => {
+  // Validate
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
+  let {
+    body: { newPassword },
+  } = req;
+
+  const {
+    user,
+    body: { password },
+  } = req;
+
+  try {
+    // Result: boolean
+    const result = await bcrypt.compare(password, user.password);
+
+    if (!result) {
+      throw new Error('Bạn nhập sai mật khẩu');
+    }
+
+    // Tạo ra salt mã hóa
+    const salt = await bcrypt.genSalt(10);
+    newPassword = await bcrypt.hash(newPassword, salt);
+
+    await User.findByIdAndUpdate(user._id, { $set: { password: newPassword } });
+
+    return Response.success(res, { message: 'Cập nhật thành công' });
+  } catch (error) {
+    console.log(error);
+    return next(error);
+  }
+};

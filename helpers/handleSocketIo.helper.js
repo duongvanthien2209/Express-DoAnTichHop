@@ -16,6 +16,14 @@ const io = socketIo(server, {
 io.on('connection', (socket) => {
   console.log('Has connection');
 
+  io.on('restaurantManagerJoin', ({ restaurantId }) => {
+    socket.join(restaurantId);
+  });
+
+  io.on('adminJoin', ({ adminName }) => {
+    socket.join(adminName);
+  });
+
   socket.on('disconnect', () => {
     console.log('User has left');
   });

@@ -14,6 +14,12 @@ router.use(handleError);
 
 router.use(protect);
 
+router.use(handleError);
+
+router.use('/mail', require('./admin/mail.route'));
+
+router.use(handleError);
+
 router.use('/food', require('./admin/food.route'));
 
 router.use(handleError);

@@ -13,6 +13,10 @@ router.use(protect);
 
 router.use(handleError);
 
+router.use('/mail', require('./user/mail.route'));
+
+router.use(handleError);
+
 router.use('/cart', require('./user/cart.route'));
 
 router.use(handleError);
