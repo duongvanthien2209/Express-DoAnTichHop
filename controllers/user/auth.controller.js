@@ -72,7 +72,7 @@ exports.login = async (req, res, next) => {
   // console.log(req.body);
 
   try {
-    const user = await User.findOne({ name: username });
+    const user = await User.findOne({ username });
 
     if (!user) {
       throw new Error('Bạn nhập sai tên đăng nhập');
@@ -134,7 +134,7 @@ exports.register = async (req, res, next) => {
       throw new Error('Email đã tồn tại');
     } else user = null;
 
-    user = await User.findOne({ name: username });
+    user = await User.findOne({ username });
 
     if (user) {
       throw new Error('Tên đăng nhập đã tồn tại');
@@ -143,7 +143,7 @@ exports.register = async (req, res, next) => {
     // Tạo ra salt mã hóa
     const salt = await bcrypt.genSalt(10);
     user = await User.create({
-      name: username,
+      username,
       email,
       password: await bcrypt.hash(password, salt),
       SDT,
