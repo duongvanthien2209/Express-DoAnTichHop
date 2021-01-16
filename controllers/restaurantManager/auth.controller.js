@@ -141,7 +141,7 @@ exports.login = async (req, res, next) => {
       { expiresIn: 360000 },
       (err, token) => {
         if (err) throw err;
-        Response.success(res, { token });
+        Response.success(res, { token, restaurantManager: restaurant });
       },
     );
 

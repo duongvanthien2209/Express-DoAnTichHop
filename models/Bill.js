@@ -1,9 +1,10 @@
 const mongoose = require('mongoose');
 
 const BillSchema = new mongoose.Schema({
+  // 'đang xử lý', 'đã xác nhận', 'đã hủy', 'đã thanh toán'
   isCompleted: {
-    type: Boolean,
-    default: false,
+    type: String,
+    default: 'đang xử lý',
   },
   nhaHang: {
     type: mongoose.Schema.Types.ObjectId,

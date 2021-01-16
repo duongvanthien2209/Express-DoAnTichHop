@@ -8,7 +8,7 @@ const CTBill = require('../models/CTBill');
 
 const limit = 20;
 
-exports.getAll = async (req, res, next) => {
+exports.getAllByRestaurantManager = async (req, res, next) => {
   let {
     query: { q },
   } = req;
@@ -32,16 +32,39 @@ exports.getAll = async (req, res, next) => {
   }
 };
 
-exports.complete = async (req, res, next) => {
+exports.updateByRestaurantManager = async (req, res, next) => {
+  let {
+    query: { soLuong },
+  } = req;
   const {
-    params: { billId },
+    params: { ctBillId },
   } = req;
 
   try {
-    const bill = await Bill.findById(billId);
+    soLuong = parseInt(soLuong, 10);
+    let ctBill = await CTBill.findById(ctBillId);
+    if (!ctBill) throw new Error('Có lỗi xảy ra');
+
+    ctBill = await CTBill.findByIdAndUpdate(ctBillId, { $set: { soLuong } });
+
+    return Response.success(res, { ctBill });
+  } catch (error) {
+    console.log(error);
+    return next(error);
+  }
+};
+
+// Cập nhật lại
+exports.complete = async (req, res, next) => {
+  const {
+    params: { billId },
+    query: { q },
+  } = req;
+
+  try {
+    let bill = await Bill.findById(billId);
     if (!bill) throw new Error('Có lỗi xảy ra');
-    if (!bill.isCompleted) bill.isCompleted = true;
-    await bill.save();
+    bill = await Bill.findByIdAndUpdate(billId, { $set: { isCompleted: q } });
     return Response.success(res, { bill });
   } catch (error) {
     console.log(error);
@@ -49,21 +72,17 @@ exports.complete = async (req, res, next) => {
   }
 };
 
-exports.delete = async (req, res, next) => {
+// Xóa chi tiết hóa đơn - Không có xóa hóa đơn, chỉ có cập nhật lại trạng thái hóa đơn
+exports.deleteByRestaurantManager = async (req, res, next) => {
   const {
-    params: { billId },
+    params: { ctBillId },
   } = req;
 
   try {
-    const bill = await Bill.findById(billId);
-    if (!bill) throw new Error('Có lỗi xảy ra');
+    const ctBill = await CTBill.findById(ctBillId);
+    if (!ctBill) throw new Error('Có lỗi xảy ra');
 
-    const ctBills = await CTBill.find({ hoaDon: bill._id });
-    for (const ctBill of ctBills) {
-      await CTBill.findByIdAndDelete(ctBill._id);
-    }
-
-    await Bill.findByIdAndDelete(billId);
+    await CTBill.findByIdAndDelete(ctBillId);
 
     return Response.success(res, { message: 'Xóa thành công' });
   } catch (error) {

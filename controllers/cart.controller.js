@@ -3,19 +3,25 @@
 /* eslint-disable no-underscore-dangle */
 const Cart = require('../models/Cart');
 const Food = require('../models/Food');
+const Mail = require('../models/Mail');
 
 const Response = require('../helpers/response.helper');
 const CTBill = require('../models/CTBill');
 const Bill = require('../models/Bill');
 
+const { io } = require('../helpers/handleSocketIo.helper');
+
 exports.create = async (req, res, next) => {
+  let {
+    query: { soLuong },
+  } = req;
   const {
     user,
     params: { foodId },
-    body: { soLuong },
   } = req;
 
   try {
+    soLuong = parseInt(soLuong, 10);
     const food = await Food.findById(foodId);
     if (!food) throw new Error('Có lỗi xảy ra');
 
@@ -32,6 +38,31 @@ exports.create = async (req, res, next) => {
   }
 };
 
+exports.update = async (req, res, next) => {
+  let {
+    query: { soLuong },
+  } = req;
+  const {
+    // user,
+    params: { cartId },
+  } = req;
+
+  try {
+    soLuong = parseInt(soLuong, 10);
+
+    let cart = await Cart.findById(cartId);
+    if (!cart) throw new Error('Có lỗi xảy ra');
+
+    cart = await Cart.findByIdAndUpdate(cartId, { $set: { soLuong } });
+
+    return Response.success(res, { cart });
+  } catch (error) {
+    console.log(error);
+    return next(error);
+  }
+};
+
+// Đăt món xong -> gởi thông tin hóa đơn cho nhà hàng xử lý
 exports.datMon = async (req, res, next) => {
   const { user } = req;
 
@@ -41,12 +72,15 @@ exports.datMon = async (req, res, next) => {
 
     const bills = [];
     for (const cart of carts) {
-      let bill = bills.find((item) => item.nhaHang === cart.monAn.nhaHang);
+      let bill = bills.find(
+        (item) => item.nhaHang.toString() === cart.monAn.nhaHang.toString(),
+      );
       if (!bill) {
         bill = await Bill.create({
           khachHang: user._id,
           nhaHang: cart.monAn.nhaHang,
         });
+
         bills.push(bill);
       }
 
@@ -55,6 +89,23 @@ exports.datMon = async (req, res, next) => {
         monAn: cart.monAn._id,
         soLuong: cart.soLuong,
       });
+
+      // Xóa các món ăn đã đặt trong giỏ hàng
+      await cart.delete();
+    }
+
+    // Gửi thông báo đến nhà hàng
+    for (const bill of bills) {
+      // Tạo thư mới của nhà hàng đó
+      await Mail.create({
+        text: bill.id,
+        nhaHang: bill.nhaHang,
+      });
+
+      io.to(bill.nhaHang.toString()).emit(
+        'billMessage',
+        'Có yêu cầu từ khách hàng, check hóa đơn!',
+      );
     }
 
     return Response.success(res, { message: 'Đặt món thành công' });

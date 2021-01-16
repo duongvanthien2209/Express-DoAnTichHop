@@ -6,6 +6,8 @@ const http = require('http');
 
 const server = http.createServer(app);
 
+const Restaurant = require('../models/Restaurant');
+
 const io = socketIo(server, {
   cors: {
     origin: 'http://localhost:3000',
@@ -16,11 +18,22 @@ const io = socketIo(server, {
 io.on('connection', (socket) => {
   console.log('Has connection');
 
-  io.on('restaurantManagerJoin', ({ restaurantId }) => {
-    socket.join(restaurantId);
-  });
+  socket.on(
+    'restaurantManagerJoin',
+    async ({ restaurantManagerId }, callback) => {
+      try {
+        const restaurant = await Restaurant.findById(restaurantManagerId);
+        if (!restaurant) throw new Error('Có lỗi xảy ra');
+        console.log(`RestaurantManager joined ${restaurantManagerId}`);
+        return socket.join(restaurantManagerId);
+      } catch (error) {
+        console.log(error);
+        return callback(error.message);
+      }
+    },
+  );
 
-  io.on('adminJoin', ({ adminName }) => {
+  socket.on('adminJoin', ({ adminName }) => {
     socket.join(adminName);
   });
 

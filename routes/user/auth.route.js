@@ -11,6 +11,7 @@ const {
   find,
   update,
   updatePassword,
+  getMe,
 } = require('../../controllers/user/auth.controller');
 const { protect } = require('../../middlewares/user/auth');
 
@@ -89,5 +90,10 @@ router.post(
   protect,
   update,
 );
+
+// @route   GET api/admin/auth/getMe
+// @desc    Lấy thông tin tài khoản
+// @access  Private
+router.get('/getMe', protect, getMe);
 
 module.exports = router;

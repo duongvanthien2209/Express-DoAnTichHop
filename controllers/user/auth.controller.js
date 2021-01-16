@@ -185,6 +185,11 @@ exports.register = async (req, res, next) => {
   }
 };
 
+exports.getMe = (req, res) => {
+  const { user } = req;
+  return Response.success(res, { user });
+};
+
 exports.update = async (req, res, next) => {
   // Validate
   const errors = validationResult(req);
