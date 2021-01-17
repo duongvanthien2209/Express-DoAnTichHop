@@ -14,6 +14,21 @@ const Response = require('../../helpers/response.helper');
 
 const limit = 20;
 
+exports.verifyUsername = async (req, res, next) => {
+  const {
+    query: { username },
+  } = req;
+
+  try {
+    const user = await User.findOne({ username });
+    if (user) throw new Error('Tên đăng nhập đã tồn tại');
+    return Response.success(res, { message: 'Tên đăng nhập hợp lệ' });
+  } catch (error) {
+    console.log(error);
+    return next(error);
+  }
+};
+
 exports.getAll = async (req, res, next) => {
   let { q } = req.query;
 

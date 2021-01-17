@@ -12,6 +12,7 @@ const {
   update,
   updatePassword,
   getMe,
+  verifyUsername,
 } = require('../../controllers/user/auth.controller');
 const { protect } = require('../../middlewares/user/auth');
 
@@ -55,6 +56,11 @@ router.post(
   ],
   register,
 );
+
+// @route   GET api/admin/auth/verifyUsername?username=''
+// @desc    Lấy thông tin tài khoản
+// @access  Private
+router.get('/verifyUsername', verifyUsername);
 
 // @route   POST api/admin/auth/updatePassword
 // @desc    Cập nhật mật khẩu
