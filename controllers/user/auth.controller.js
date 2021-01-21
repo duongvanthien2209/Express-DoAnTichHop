@@ -93,6 +93,8 @@ exports.login = async (req, res, next) => {
       throw new Error('Bạn nhập sai tên đăng nhập');
     }
 
+    if (!user.isVerified) throw new Error('Tài khoản chưa được xác nhận');
+
     // Result: boolean
     const result = await bcrypt.compare(password, user.password);
 
