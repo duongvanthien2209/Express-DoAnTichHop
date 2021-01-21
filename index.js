@@ -9,7 +9,7 @@ const { app, server } = require('./helpers/handleSocketIo.helper');
 
 const connectDB = require('./config/db');
 
-const { add, add1, add2, add3 } = require('./example');
+const { add, add1, add2, add3, add4, add5 } = require('./example');
 
 // Kết nối database
 connectDB();
@@ -29,6 +29,13 @@ const apiRoute = require('./routes/api.route');
 app.use(cors());
 
 app.use('/api', apiRoute);
+
+// Thêm dữ liệu
+// Loại nhà hàng
+// add5('Bakery');
+
+// Thêm dữ liệu
+add4();
 
 // app.get('/', example);
 

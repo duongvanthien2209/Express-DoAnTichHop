@@ -42,6 +42,14 @@ const RestaurantSchema = new mongoose.Schema({
     ref: 'RestaurantType',
     required: true,
   },
+  toaDo: {
+    x: Number,
+    y: Number,
+  },
+  hinh: {
+    type: String,
+    default: 'https://picsum.photos/200',
+  },
 });
 
 const Restaurant = mongoose.model(
