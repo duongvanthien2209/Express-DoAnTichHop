@@ -170,7 +170,12 @@ exports.register = async (req, res, next) => {
       fullName,
       gioiTinh,
       CMND,
-      ngaySinh: new Date(+dateParts[2], dateParts[1] - 1, +dateParts[0]),
+      ngaySinh: new Date(
+        parseInt(dateParts[2], 10),
+        parseInt(dateParts[1], 10) - 1,
+        parseInt(dateParts[0], 10),
+      ),
+      // ngaySinh,
     });
 
     // Tạo 1 token -> lưu lại -> gởi email + token -> email gởi lại token hợp lệ -> verified user
@@ -190,7 +195,7 @@ exports.register = async (req, res, next) => {
       'host',
     )}/api/auth/confirmation/${token}</a>`;
 
-    const message = `<p>Hello ${user.name},</p><p>Bạn cần truy cập vào link sau để xác nhận tài khoản:</p><p>${tokenUrl}</p>`;
+    const message = `<p>Hello ${user.fullName},</p><p>Bạn cần truy cập vào link sau để xác nhận tài khoản:</p><p>${tokenUrl}</p>`;
     await sendEmail({
       email: user.email,
       subject: 'Account verification token',

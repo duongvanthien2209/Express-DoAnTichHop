@@ -20,7 +20,6 @@ const UserSchema = new mongoose.Schema({
   diaChi: {
     type: String,
     required: true,
-    unique: true,
   },
 
   ngaySinh: {
