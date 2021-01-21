@@ -35,7 +35,7 @@ app.use('/api', apiRoute);
 // add5('Bakery');
 
 // Thêm dữ liệu
-add4();
+// add4();
 
 // app.get('/', example);
 
