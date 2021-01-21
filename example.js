@@ -11,6 +11,7 @@ const FoodType = require('./models/FoodType');
 const Comment = require('./models/Comment');
 const User = require('./models/User');
 const Star = require('./models/Star');
+const Response = require('./helpers/response.helper');
 
 function removeVietnameseTones(str) {
   str = str.replace(/à|á|ạ|ả|ã|â|ầ|ấ|ậ|ẩ|ẫ|ă|ằ|ắ|ặ|ẳ|ẵ/g, 'a');
@@ -364,9 +365,14 @@ exports.add4 = async () => {
 };
 
 // Thêm loại thức ăn
-exports.add1 = async (tenLoai) => {
-  await FoodType.create({ tenLoai });
-  console.log('Thêm loại món ăn');
+exports.add1 = async (req, res) => {
+  const { tenLoai } = req.body;
+  try {
+    await FoodType.create({ tenLoai });
+    return Response.success(res, { message: 'Thêm loại thức ăn thành công' });
+  } catch (error) {
+    return console.log(error);
+  }
 };
 
 // Thêm comment
