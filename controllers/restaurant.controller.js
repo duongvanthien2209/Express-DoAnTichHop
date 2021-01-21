@@ -26,6 +26,7 @@ exports.getAll = async (req, res, next) => {
     const total = await Restaurant.find().count();
 
     const restaurants = await Restaurant.find()
+      .sort({ ngayLap: -1 })
       .skip((q - 1) * limit)
       .limit(limit);
 

@@ -9,7 +9,7 @@ const {
 } = require('../controllers/restaurant.controller');
 
 // @route   GET api/restaurantManager/restaurant?q=1
-// @desc    Lấy danh sách nhà hàng
+// @desc    Lấy danh sách nhà hàng - theo thứ tự mới -> cũ
 // @access  Private
 router.get('/', getAll);
 

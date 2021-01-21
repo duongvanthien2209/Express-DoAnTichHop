@@ -33,6 +33,7 @@ app.use('/api', apiRoute);
 // Thêm dữ liệu
 // Loại nhà hàng
 // add5('Bakery');
+add1('Trà');
 
 // Thêm dữ liệu
 // add4();

@@ -22,3 +22,17 @@ exports.getAll = async (req, res, next) => {
     return next(error);
   }
 };
+
+exports.create = async (req, res, next) => {
+  const { tenLoai } = req;
+
+  try {
+    let foodType = await FoodType.findOne({ tenLoai });
+    if (foodType) throw new Error('Tên loại món ăn đã tồn tại');
+    foodType = await FoodType.create({ tenLoai });
+    return Response.success(res, { foodType });
+  } catch (error) {
+    console.log(error);
+    return next(error);
+  }
+};
