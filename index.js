@@ -9,7 +9,15 @@ const { app, server } = require('./helpers/handleSocketIo.helper');
 
 const connectDB = require('./config/db');
 
-const { add, add1, add2, add3, add4, add5 } = require('./example');
+const {
+  add,
+  add1,
+  add2,
+  add3,
+  add4,
+  add5,
+  getMonExample,
+} = require('./example');
 
 // Kết nối database
 connectDB();
@@ -36,8 +44,8 @@ app.use('/api', apiRoute);
 app.post('/foodType', add1);
 // add1('Trà');
 
-// Thêm dữ liệu
-// add4();
+// Lấy danh sách món ăn
+app.get('/food', getMonExample);
 
 // app.get('/', example);
 

@@ -11,6 +11,7 @@ const FoodType = require('./models/FoodType');
 const Comment = require('./models/Comment');
 const User = require('./models/User');
 const Star = require('./models/Star');
+const Food = require('./models/Food');
 const Response = require('./helpers/response.helper');
 
 function removeVietnameseTones(str) {
@@ -406,6 +407,29 @@ exports.add5 = async (name) => {
   });
 
   console.log('Thêm loại nhà hàng thành công');
+};
+
+const limit = 20;
+
+exports.getMonExample = async (req, res) => {
+  let {
+    query: { q },
+  } = req;
+  try {
+    q = parseInt(q, 10);
+    const totals = await Food.find().count();
+    const foods = await Food.find()
+      .populate('loai')
+      .populate('nhaHang')
+      .skip((q - 1) * limit)
+      .limit(limit);
+
+    if (!foods) throw new Error('Có lỗi xảy ra');
+    return Response.success(res, { totals, foods });
+  } catch (error) {
+    console.log(error);
+    return Response.error(res, error);
+  }
 };
 
 // add(
