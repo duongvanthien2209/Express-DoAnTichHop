@@ -76,6 +76,7 @@ exports.find = async (req, res, next) => {
 
 exports.login = async (req, res, next) => {
   // Validate
+  console.log(req);
   const errors = validationResult(req);
 
   if (!errors.isEmpty()) {
