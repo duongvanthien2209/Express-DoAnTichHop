@@ -16,6 +16,10 @@ const BillSchema = new mongoose.Schema({
     ref: 'User',
     required: true,
   },
+  total: {
+    type: Number,
+    default: 0,
+  },
   dateCreate: {
     type: Date,
     default: Date.now(),

@@ -21,4 +21,8 @@ router.use('/cart', require('./user/cart.route'));
 
 router.use(handleError);
 
+router.use('/bill', require('./user/bill.route'));
+
+router.use(handleError);
+
 module.exports = router;

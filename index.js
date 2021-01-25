@@ -17,6 +17,7 @@ const {
   add4,
   add5,
   getMonExample,
+  updateValidateUser,
 } = require('./example');
 
 // Kết nối database
@@ -47,6 +48,8 @@ app.post('/foodType', add1);
 // Lấy danh sách món ăn
 app.get('/food', getMonExample);
 
+// Cập nhật người dùng
+app.get('/user/update/:userId', updateValidateUser);
 // app.get('/', example);
 
 server.listen(PORT, () => console.log(`Server started on port ${PORT}`));

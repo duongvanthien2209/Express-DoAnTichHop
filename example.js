@@ -432,6 +432,23 @@ exports.getMonExample = async (req, res) => {
   }
 };
 
+exports.updateValidateUser = async (req, res) => {
+  const {
+    params: { userId },
+  } = req;
+
+  try {
+    const user = await User.findById(userId);
+    if (!user) throw new Error('Có lỗi xảy ra');
+    await User.findByIdAndUpdate(userId, {
+      $set: { isVerified: !user.isVerified },
+    });
+    return Response.success(res, { message: 'Cập nhật thành công' });
+  } catch (error) {
+    return console.log(error.message);
+  }
+};
+
 // add(
 //   'Bún Bò Hiến Hằng',
 //   'bunBoHienHang',

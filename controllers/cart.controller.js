@@ -11,6 +11,25 @@ const Bill = require('../models/Bill');
 
 const { io } = require('../helpers/handleSocketIo.helper');
 
+exports.getAllByUser = async (req, res, next) => {
+  const { user } = req;
+
+  try {
+    const carts = await Cart.find({ khachHang: user._id });
+    if (!carts) throw new Error('Có lỗi xảy ra');
+
+    for (const cart of carts) {
+      const food = await Food.findById(cart.monAn).populate('nhaHang');
+      cart.monAn = food;
+    }
+
+    return Response.success(res, { carts });
+  } catch (error) {
+    console.log(error);
+    return next(error);
+  }
+};
+
 exports.create = async (req, res, next) => {
   let {
     query: { soLuong },
@@ -89,6 +108,10 @@ exports.datMon = async (req, res, next) => {
         monAn: cart.monAn._id,
         soLuong: cart.soLuong,
       });
+
+      // Cập nhật lại tổng tiền của hóa đơn
+      bill.total += cart.soLuong * cart.monAn.gia;
+      await bill.save();
 
       // Xóa các món ăn đã đặt trong giỏ hàng
       await cart.delete();

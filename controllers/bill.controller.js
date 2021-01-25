@@ -32,6 +32,69 @@ exports.getAllByRestaurantManager = async (req, res, next) => {
   }
 };
 
+exports.getAllByUser = async (req, res, next) => {
+  const { user } = req;
+
+  try {
+    // Tổng tất cả hóa đơn của khách hàng đó
+    const total = await Bill.find({ khachHang: user._id }).count();
+    const bills = await Bill.find({
+      $and: [
+        { khachHang: user._id },
+        { isCompleted: { $in: ['đang xử lý', 'đã xác nhận'] } },
+      ],
+    }).populate('nhaHang');
+
+    if (!bills) throw new Error('Có lỗi xảy ra');
+
+    return Response.success(res, { bills, total });
+  } catch (error) {
+    console.log(error);
+    return next(error);
+  }
+};
+
+exports.getAllByUserCompleted = async (req, res, next) => {
+  const { user } = req;
+
+  try {
+    // Tổng tất cả hóa đơn của khách hàng đó
+    const total = await Bill.find({ khachHang: user._id }).count();
+    const bills = await Bill.find({
+      $and: [
+        { khachHang: user._id },
+        { isCompleted: { $in: ['đã hủy', 'đã thanh toán'] } },
+      ],
+    }).populate('nhaHang');
+
+    if (!bills) throw new Error('Có lỗi xảy ra');
+
+    return Response.success(res, { bills, total });
+  } catch (error) {
+    console.log(error);
+    return next(error);
+  }
+};
+
+exports.getCTBill = async (req, res, next) => {
+  const {
+    params: { billId },
+  } = req;
+
+  try {
+    const bill = await Bill.findById(billId).populate('nhaHang');
+    if (!bill) throw new Error('Có lỗi xảy ra');
+
+    const bills = await CTBill.find({ hoaDon: bill._id }).populate('monAn');
+    if (!bills) throw new Error('Có lỗi xảy ra');
+
+    return Response.success(res, { bill, CTBills: bills });
+  } catch (error) {
+    console.log(error);
+    return next(error);
+  }
+};
+
 exports.updateByRestaurantManager = async (req, res, next) => {
   let {
     query: { soLuong },

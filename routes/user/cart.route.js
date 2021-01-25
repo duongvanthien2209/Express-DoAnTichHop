@@ -7,7 +7,13 @@ const {
   delete: currentDelete,
   datMon,
   update,
+  getAllByUser,
 } = require('../../controllers/cart.controller');
+
+// @route   GET api/user/cart/getAll
+// @desc    Lấy món ăn theo người dùng
+// @access  Private
+router.get('/getAll', getAllByUser);
 
 // @route   GET api/user/cart/create?soLuong=
 // @desc    Thêm món ăn vào giỏ hàng
@@ -15,7 +21,7 @@ const {
 router.get('/create/:foodId', create);
 
 // @route   GET api/user/cart/update/${cartId}?soLuong=
-// @desc    Thêm món ăn vào giỏ hàng
+// @desc    Cập nhật lại món ăn trong giỏ hàng
 // @access  Private
 router.get('/update/:cartId', update);
 
