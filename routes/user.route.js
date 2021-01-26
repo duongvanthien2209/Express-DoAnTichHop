@@ -3,9 +3,14 @@ const express = require('express');
 const router = express.Router();
 
 const handleError = require('../helpers/handleError.helper');
+
 const { protect } = require('../middlewares/user/auth');
 
 router.use('/auth', require('./user/auth.route'));
+
+router.use('/restaurant', require('./user/restaurant.route'));
+
+router.use(handleError);
 
 router.use(handleError);
 
@@ -22,10 +27,6 @@ router.use('/cart', require('./user/cart.route'));
 router.use(handleError);
 
 router.use('/bill', require('./user/bill.route'));
-
-router.use(handleError);
-
-router.use('/restaurant', require('./user/restaurant.route'));
 
 router.use(handleError);
 
