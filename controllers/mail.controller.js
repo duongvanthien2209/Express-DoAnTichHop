@@ -97,3 +97,19 @@ exports.getAllByAdmin = async (req, res, next) => {
     return next(error);
   }
 };
+
+exports.updateReaded = async (req, res, next) => {
+  const {
+    params: { mailId },
+  } = req;
+
+  try {
+    const mail = await Mail.findById(mailId);
+    if (!mail) throw new Error('Có lỗi xảy ra');
+    await Mail.findByIdAndUpdate(mailId, { $set: { isWatched: true } });
+    return Response.success(res, { mail: await await Mail.findById(mailId) });
+  } catch (error) {
+    console.log(error);
+    return next(error);
+  }
+};

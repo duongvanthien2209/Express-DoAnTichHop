@@ -121,7 +121,7 @@ exports.datMon = async (req, res, next) => {
     for (const bill of bills) {
       // Tạo thư mới của nhà hàng đó
       await Mail.create({
-        text: bill.id,
+        text: `Hóa đơn của khác hàng: ${user.fullName}, mã hóa đơn: ${bill.id} đợi xác nhận`,
         nhaHang: bill.nhaHang,
       });
 
