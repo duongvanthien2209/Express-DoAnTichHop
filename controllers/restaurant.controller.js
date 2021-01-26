@@ -82,8 +82,11 @@ exports.getByID = async (req, res, next) => {
     if (!restaurant) throw new Error('Có lỗi xảy ra');
     const foods = await Food.find({ nhaHang: restaurant._id }).populate('loai');
     if (!foods) throw new Error('Có lỗi xảy ra');
-    restaurant.menu = foods;
-    return Response.success(res, { restaurant });
+    // restaurant.menu = foods;
+    return Response.success(res, {
+      restaurant,
+      menu: foods,
+    });
   } catch (error) {
     console.log(error);
     return next(error);
