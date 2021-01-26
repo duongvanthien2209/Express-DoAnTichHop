@@ -1,7 +1,9 @@
+/* eslint-disable no-underscore-dangle */
 // Models
 const Restaurant = require('../models/Restaurant');
 
 const Response = require('../helpers/response.helper');
+const Food = require('../models/Food');
 
 const limit = 20;
 
@@ -62,6 +64,26 @@ exports.find = async (req, res, next) => {
     if (!restaurants) throw new Error('Có lỗi xảy ra');
 
     return Response.success(res, { restaurants, total });
+  } catch (error) {
+    console.log(error);
+    return next(error);
+  }
+};
+
+exports.getByID = async (req, res, next) => {
+  const {
+    params: { restaurantId },
+  } = req;
+
+  try {
+    const restaurant = await Restaurant.findById(restaurantId).populate(
+      'loaiHinh',
+    );
+    if (!restaurant) throw new Error('Có lỗi xảy ra');
+    const foods = await Food.find({ nhaHang: restaurant._id }).populate('loai');
+    if (!foods) throw new Error('Có lỗi xảy ra');
+    restaurant.menu = foods;
+    return Response.success(res, { restaurant });
   } catch (error) {
     console.log(error);
     return next(error);

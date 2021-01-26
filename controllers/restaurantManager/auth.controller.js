@@ -3,9 +3,12 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { validationResult } = require('express-validator');
 const crypto = require('crypto');
+const fs = require('fs-promise');
 
 const sendEmail = require('../../utils/sendEmail');
 const Response = require('../../helpers/response.helper');
+const cloudinary = require('../../config/cloudinaryConfig');
+const { chuanHoa } = require('../../example');
 
 // Models
 const Restaurant = require('../../models/Restaurant');
@@ -251,5 +254,63 @@ exports.resetPassword = async (req, res, next) => {
   } catch (error) {
     console.log(error);
     return next(new Error('Có lỗi xảy ra'));
+  }
+};
+
+exports.update = async (req, res, next) => {
+  const {
+    file,
+    restaurantManager,
+    body: { email, name, sdt, diaChi, loaiHinh },
+  } = req;
+
+  try {
+    const restaurantType = await RestaurantType.findById(loaiHinh);
+    if (!restaurantType) throw new Error('Có lỗi xảy ra');
+
+    // const restaurant = await Restaurant.findOne({ $and: [ { email }, { _id:  } ] });
+    // if(restaurant) throw new Error('Email ')
+
+    if (file) {
+      let orgName = file.originalname || '';
+      orgName = orgName.trim().replace(/ /g, '-');
+      const fullPathInServ = file.path;
+      const newFullPath = `${fullPathInServ}-${orgName}`;
+      fs.rename(fullPathInServ, newFullPath);
+
+      const result = await cloudinary.uploader.upload(newFullPath);
+      fs.unlinkSync(newFullPath);
+
+      await Restaurant.findByIdAndUpdate(restaurantManager._id, {
+        $set: {
+          email,
+          name,
+          tenNhaHang: chuanHoa(name),
+          SDT: sdt,
+          diaChi,
+          loaiHinh: restaurantType,
+          hinh: result.url,
+        },
+      });
+    } else {
+      await Restaurant.findByIdAndUpdate(restaurantManager._id, {
+        $set: {
+          email,
+          name,
+          tenNhaHang: chuanHoa(name),
+          SDT: sdt,
+          diaChi,
+          loaiHinh: restaurantType,
+          // hinh: result.url,
+        },
+      });
+    }
+
+    return Response.success(res, {
+      restaurant: await Restaurant.findById(restaurantManager._id),
+    });
+  } catch (error) {
+    console.log(error);
+    return next(error);
   }
 };

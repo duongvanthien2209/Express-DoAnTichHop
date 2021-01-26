@@ -1,5 +1,8 @@
 const express = require('express');
 const { check } = require('express-validator');
+const multer = require('multer');
+
+const upload = multer({ dest: 'public/uploads/' });
 
 const {
   register,
@@ -7,7 +10,10 @@ const {
   login,
   forgotPassword,
   resetPassword,
+  update,
 } = require('../../controllers/restaurantManager/auth.controller');
+
+const { protect } = require('../../middlewares/restaurantManager/auth');
 
 const router = express.Router();
 
@@ -29,6 +35,28 @@ router.post(
     check('loaiHinh', 'Bạn phải nhập loại cửa hàng').not().isEmpty(),
   ],
   register,
+);
+
+// @route   POST api/restaurantManager/auth/update
+// @desc    Cập nhật thông tin nhà hàng
+// @access  Private
+router.post(
+  '/update',
+  [
+    // check('tenNhaHang', 'Bạn phải nhập tên cửa hàng').not().isEmpty(),
+    check('email', 'Email phải đúng định dạng').isEmail(),
+    check('name', 'Bạn phải nhập tên chủ cửa hàng').not().isEmpty(),
+    // check('password', 'Mật khẩu phải có ít nhất 8 ký tự').isLength({
+    //   min: 8,
+    //   max: 30,
+    // }),
+    check('sdt', 'Bạn phải nhập số điện thoại').not().isEmpty(),
+    check('diaChi', 'Bạn phải nhập địa chỉ').not().isEmpty(),
+    check('loaiHinh', 'Bạn phải nhập loại cửa hàng').not().isEmpty(),
+  ],
+  upload.single('hinhAnh'),
+  protect,
+  update,
 );
 
 // @route   POST api/restaurantManager/auth/confirmationEmail

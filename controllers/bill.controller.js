@@ -96,21 +96,24 @@ exports.getCTBill = async (req, res, next) => {
 };
 
 exports.updateByRestaurantManager = async (req, res, next) => {
-  let {
-    query: { soLuong },
-  } = req;
   const {
-    params: { ctBillId },
+    params: { billId },
+    body: { ctBills },
   } = req;
 
   try {
-    soLuong = parseInt(soLuong, 10);
-    let ctBill = await CTBill.findById(ctBillId);
-    if (!ctBill) throw new Error('Có lỗi xảy ra');
-
-    ctBill = await CTBill.findByIdAndUpdate(ctBillId, { $set: { soLuong } });
-
-    return Response.success(res, { ctBill });
+    let total = 0;
+    for (const item of ctBills) {
+      const ctBill = await CTBill.findByIdAndUpdate(item.id, {
+        $set: { soLuong: item.soLuong },
+      }).populate('monAn');
+      if (!ctBill) throw new Error('Có lỗi xảy ra');
+      total += ctBill.monAn.gia * item.soLuong;
+    }
+    const bill = await Bill.findByIdAndUpdate(billId, {
+      $set: { total, isCompleted: 'đã xác nhận' },
+    }).populate('khachHang');
+    return Response.success(res, { total, bill });
   } catch (error) {
     console.log(error);
     return next(error);
@@ -127,7 +130,9 @@ exports.complete = async (req, res, next) => {
   try {
     let bill = await Bill.findById(billId);
     if (!bill) throw new Error('Có lỗi xảy ra');
-    bill = await Bill.findByIdAndUpdate(billId, { $set: { isCompleted: q } });
+    bill = await Bill.findByIdAndUpdate(billId, {
+      $set: { isCompleted: q },
+    }).populate('khachHang');
     return Response.success(res, { bill });
   } catch (error) {
     console.log(error);

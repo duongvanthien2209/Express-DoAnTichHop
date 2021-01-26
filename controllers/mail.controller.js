@@ -37,12 +37,33 @@ exports.getAllByRestaurantManager = async (req, res, next) => {
 
   try {
     q = parseInt(q, 10);
+    const total = await Mail.find({ nhaHang: restaurantManager._id }).count();
     const mails = await Mail.find({ nhaHang: restaurantManager._id })
       .skip((q - 1) * limit)
       .limit(limit)
       .sort({
         dateCreate: -1,
       });
+
+    if (!mails) throw new Error('Có lỗi xảy ra');
+
+    return Response.success(res, { mails, total });
+  } catch (error) {
+    console.log(error);
+    return next(error);
+  }
+};
+
+// Lấy các tin nhắn chưa đọc
+exports.getAllByRestaurantManager1 = async (req, res, next) => {
+  const { restaurantManager } = req;
+
+  try {
+    const mails = await Mail.find({
+      $and: [{ nhaHang: restaurantManager._id }, { isWatched: false }],
+    }).sort({
+      dateCreate: -1,
+    });
 
     if (!mails) throw new Error('Có lỗi xảy ra');
 

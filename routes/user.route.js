@@ -25,4 +25,8 @@ router.use('/bill', require('./user/bill.route'));
 
 router.use(handleError);
 
+router.use('/restaurant', require('./user/restaurant.route'));
+
+router.use(handleError);
+
 module.exports = router;
