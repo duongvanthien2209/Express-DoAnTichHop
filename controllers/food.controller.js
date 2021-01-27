@@ -58,6 +58,39 @@ exports.getAll = async (req, res, next) => {
   }
 };
 
+exports.findByAdmin = async (req, res, next) => {
+  let {
+    query: { q },
+  } = req;
+  const {
+    query: { name },
+  } = req;
+
+  try {
+    q = parseInt(q, 10);
+    // let total;
+    let foods = await Food.find().populate('nhaHang').populate('loai');
+
+    foods = foods.filter(
+      (food) => food.tenMon.toLowerCase().indexOf(name.toLowerCase()) > -1,
+    );
+    const total = foods.length;
+
+    // .skip((q - 1) * limit)
+    // .limit(limit);
+
+    if (!foods) throw new Error('Có lỗi xảy ra');
+
+    return Response.success(res, {
+      foods: foods.slice((q - 1) * limit, (q - 1) * limit + limit),
+      total,
+    });
+  } catch (error) {
+    console.log(error);
+    return next(error);
+  }
+};
+
 // Tìm bởi người dùng
 exports.find = async (req, res, next) => {
   // let { q } = req.query;
@@ -131,25 +164,35 @@ exports.findByUser = async (req, res, next) => {
   try {
     q = parseInt(q, 10);
 
-    const total = await Food.find({
-      $and: [
-        {
-          $where: `this.tenMon.toLowerCase().indexOf('${name.toLowerCase()}') > -1`,
-        },
-        { nhaHang: restaurant._id },
-      ],
-    }).count();
+    // let total = await Food.find({
+    //   $and: [
+    //     {
+    //       $where: `this.tenMon.toLowerCase().indexOf('${name.toLowerCase()}') > -1`,
+    //     },
+    //     { nhaHang: restaurant._id },
+    //   ],
+    // }).count();
 
-    const foods = await Food.find({
-      $and: [
-        {
-          $where: `this.tenMon.toLowerCase().indexOf('${name.toLowerCase()}') > -1`,
-        },
-        { nhaHang: restaurant._id },
-      ],
-    })
-      .skip((q - 1) * limit)
-      .limit(limit);
+    // let foods = await Food.find({
+    //   $and: [
+    //     {
+    //       $where: `this.tenMon.toLowerCase().indexOf('${name.toLowerCase()}') > -1`,
+    //     },
+    //     { nhaHang: restaurant._id },
+    //   ],
+    // })
+    //   .skip((q - 1) * limit)
+    //   .limit(limit);
+
+    let foods = await Food.find({ nhaHang: restaurant._id }).populate('loai');
+
+    foods = foods
+      .filter(
+        (food) => food.tenMon.toLowerCase().indexOf(name.toLowerCase()) > -1,
+      )
+      .slice((q - 1) * limit, (q - 1) * limit + limit);
+
+    const total = foods.length;
 
     if (!foods) throw new Error('Có lỗi xảy ra');
 

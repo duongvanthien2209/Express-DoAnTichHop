@@ -51,19 +51,30 @@ exports.find = async (req, res, next) => {
 
     q = parseInt(q, 10);
 
-    const total = await Restaurant.find({
-      $where: `this.tenNhaHang.toLowerCase().indexOf('${name.toLowerCase()}') > -1`,
-    }).count();
+    let restaurants = await Restaurant.find();
+    restaurants = restaurants.filter(
+      (restaurant) =>
+        restaurant.tenNhaHang.toLowerCase().indexOf(name.toLowerCase()) > -1,
+    );
 
-    const restaurants = await Restaurant.find({
-      $where: `this.tenNhaHang.toLowerCase().indexOf('${name.toLowerCase()}') > -1`,
-    })
-      .skip((q - 1) * limit)
-      .limit(limit);
+    const total = restaurants.length;
+
+    // const total = await Restaurant.find({
+    //   $where: `this.tenNhaHang.toLowerCase().indexOf('${name.toLowerCase()}') > -1`,
+    // }).count();
+
+    // const restaurants = await Restaurant.find({
+    //   $where: `this.tenNhaHang.toLowerCase().indexOf('${name.toLowerCase()}') > -1`,
+    // })
+    //   .skip((q - 1) * limit)
+    //   .limit(limit);
 
     if (!restaurants) throw new Error('Có lỗi xảy ra');
 
-    return Response.success(res, { restaurants, total });
+    return Response.success(res, {
+      restaurants: restaurants.slice((q - 1) * limit, (q - 1) * limit + limit),
+      total,
+    });
   } catch (error) {
     console.log(error);
     return next(error);

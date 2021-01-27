@@ -56,18 +56,28 @@ exports.find = async (req, res, next) => {
   try {
     q = parseInt(q, 10);
 
-    const total = await User.find({
-      $where: `this.fullName.toLowerCase().indexOf('${name.toLowerCase()}') > -1`,
-    }).count();
-    const users = await User.find({
-      $where: `this.fullName.toLowerCase().indexOf('${name.toLowerCase()}') > -1`,
-    })
-      .skip((q - 1) * limit)
-      .limit(limit);
+    let users = await User.find();
+    users = users.filter(
+      (user) => user.fullName.toLowerCase().indexOf(name.toLowerCase()) > -1,
+    );
+
+    const total = users.length;
+
+    // const total = await User.find({
+    //   $where: `this.fullName.toLowerCase().indexOf('${name.toLowerCase()}') > -1`,
+    // }).count();
+    // const users = await User.find({
+    //   $where: `this.fullName.toLowerCase().indexOf('${name.toLowerCase()}') > -1`,
+    // })
+    //   .skip((q - 1) * limit)
+    //   .limit(limit);
 
     if (!users) throw new Error('Có lỗi xảy ra');
 
-    return Response.success(res, { users, total });
+    return Response.success(res, {
+      users: users.slice((q - 1) * limit, (q - 1) * limit + limit),
+      total,
+    });
   } catch (error) {
     console.log(error);
     return next(error);
