@@ -58,24 +58,55 @@ exports.getAll = async (req, res, next) => {
   }
 };
 
+// Tìm bởi người dùng
 exports.find = async (req, res, next) => {
-  let { q } = req.query;
-  const { name } = req.query;
+  // let { q } = req.query;
+  const {
+    query: { foodTypeId },
+    body: { name },
+  } = req;
 
   try {
-    q = parseInt(q, 10);
+    // q = parseInt(q, 10);
+    let total;
+    let foods;
 
-    const total = await Food.find({
-      $where: `this.tenMon.toLowerCase().indexOf('${name.toLowerCase()}') > -1`,
-    }).count();
+    if (foodTypeId) {
+      const foodType = await FoodType.findById(foodTypeId);
+      if (!foodType) throw new Error('Có lỗi xảy ra');
 
-    const foods = await Food.find({
-      $where: `this.tenMon.toLowerCase().indexOf('${name.toLowerCase()}') > -1`,
-    })
-      .populate('nhaHang')
-      .populate('loai')
-      .skip((q - 1) * limit)
-      .limit(limit);
+      total = await Food.find({
+        $and: [
+          { loai: foodType._id },
+          {
+            $where: `this.tenMon.toLowerCase().indexOf('${name.toLowerCase()}') > -1`,
+          },
+        ],
+      }).count();
+
+      foods = await Food.find({
+        $and: [
+          { loai: foodType._id },
+          {
+            $where: `this.tenMon.toLowerCase().indexOf('${name.toLowerCase()}') > -1`,
+          },
+        ],
+      })
+        .populate('nhaHang')
+        .populate('loai');
+    } else {
+      total = await Food.find({
+        $where: `this.tenMon.toLowerCase().indexOf('${name.toLowerCase()}') > -1`,
+      }).count();
+
+      foods = await Food.find({
+        $where: `this.tenMon.toLowerCase().indexOf('${name.toLowerCase()}') > -1`,
+      })
+        .populate('nhaHang')
+        .populate('loai');
+    }
+    // .skip((q - 1) * limit)
+    // .limit(limit);
 
     if (!foods) throw new Error('Có lỗi xảy ra');
 

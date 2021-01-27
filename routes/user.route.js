@@ -12,7 +12,11 @@ router.use('/restaurant', require('./user/restaurant.route'));
 
 router.use(handleError);
 
+router.use('/food', require('./user/food.route'));
+
 router.use(handleError);
+
+// router.use(handleError);
 
 router.use(protect);
 
