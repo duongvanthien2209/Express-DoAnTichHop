@@ -3,6 +3,11 @@ const jwt = require('jsonwebtoken');
 const { validationResult } = require('express-validator');
 const crypto = require('crypto');
 
+const Food = require('../../models/Food');
+const FoodType = require('../../models/FoodType');
+const Restaurant = require('../../models/Restaurant');
+const User = require('../../models/User');
+
 const Response = require('../../helpers/response.helper');
 const sendEmail = require('../../utils/sendEmail');
 
@@ -133,5 +138,24 @@ exports.resetPassword = async (req, res, next) => {
   } catch (error) {
     console.log(error);
     return next(new Error('Có lỗi xảy ra'));
+  }
+};
+
+exports.thongKe = async (req, res, next) => {
+  try {
+    const foodTotal = await Food.find().count();
+    const userTotal = await User.find().count();
+    const foodTypeTotal = await FoodType.find().count();
+    const restaurantTotal = await Restaurant.find().count();
+
+    return Response.success(res, {
+      foodTotal,
+      restaurantTotal,
+      userTotal,
+      foodTypeTotal,
+    });
+  } catch (error) {
+    console.log(error);
+    return next(error);
   }
 };

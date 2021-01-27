@@ -6,6 +6,7 @@ const {
   login,
   forgotPassword,
   resetPassword,
+  thongKe,
 } = require('../../controllers/admin/auth.controller');
 
 // @route   POST api/admin/auth/login
@@ -45,5 +46,10 @@ router.post(
   ],
   resetPassword,
 );
+
+// @route   POST api/admin/auth/thongKe
+// @desc    Reset mật khẩu
+// @access  Public
+router.get('/thongKe', thongKe);
 
 module.exports = router;

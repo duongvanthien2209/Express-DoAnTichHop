@@ -156,7 +156,7 @@ exports.updateByRestaurantManager = async (req, res, next) => {
   }
 };
 
-// Cập nhật lại
+// Cập nhật lại -> bởi chủ cửa hàng
 exports.complete = async (req, res, next) => {
   const {
     params: { billId },
@@ -166,6 +166,10 @@ exports.complete = async (req, res, next) => {
   try {
     let bill = await Bill.findById(billId);
     if (!bill) throw new Error('Có lỗi xảy ra');
+
+    if (q === 'đã hủy' || q === 'đã thanh toán')
+      throw new Error('Bạn không được phép thay đổi');
+
     bill = await Bill.findByIdAndUpdate(billId, {
       $set: { isCompleted: q },
     }).populate('khachHang');
