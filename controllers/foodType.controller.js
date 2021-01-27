@@ -4,6 +4,17 @@ const Response = require('../helpers/response.helper');
 
 const limit = 20;
 
+exports.getAllFoodType = async (req, res, next) => {
+  try {
+    const foodTypes = await FoodType.find();
+    if (!foodTypes) throw new Error('Có lỗi xảy ra');
+    return Response.success(res, { foodTypes });
+  } catch (error) {
+    console.log(error);
+    return next(error);
+  }
+};
+
 exports.getAll = async (req, res, next) => {
   let { q } = req.query;
 

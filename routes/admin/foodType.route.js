@@ -2,7 +2,16 @@
 const express = require('express');
 
 const router = express.Router();
-const { getAll, create } = require('../../controllers/foodType.controller');
+const {
+  getAll,
+  create,
+  getAllFoodType,
+} = require('../../controllers/foodType.controller');
+
+// @route   GET api/restaurantManager/foodType/getAllFoodType
+// @desc    Lấy danh sách tất cả các loại món ăn
+// @access  Private
+router.get('/getAllFoodType', getAllFoodType);
 
 // @route   GET api/restaurantManager/foodType?q=1
 // @desc    Lấy danh sách loại món ăn
