@@ -68,49 +68,54 @@ exports.find = async (req, res, next) => {
 
   try {
     // q = parseInt(q, 10);
-    let total;
+    // let total;
     let foods;
 
     if (foodTypeId) {
       const foodType = await FoodType.findById(foodTypeId);
       if (!foodType) throw new Error('Có lỗi xảy ra');
 
-      total = await Food.find({
-        $and: [
-          { loai: foodType._id },
-          {
-            $where: `this.tenMon.toLowerCase().indexOf('${name.toLowerCase()}') > -1`,
-          },
-        ],
-      }).count();
+      // total = await Food.find({
+      //   $and: [
+      //     { loai: foodType._id },
+      //     {
+      //       $where: `this.tenMon.toLowerCase().indexOf('${name.toLowerCase()}') > -1`,
+      //     },
+      //   ],
+      // }).count();
 
-      foods = await Food.find({
-        $and: [
-          { loai: foodType._id },
-          {
-            $where: `this.tenMon.toLowerCase().indexOf('${name.toLowerCase()}') > -1`,
-          },
-        ],
-      })
+      // foods = await Food.find({
+      //   $and: [
+      //     { loai: foodType._id },
+      //     {
+      //       $where: `this.tenMon.toLowerCase().indexOf('${name.toLowerCase()}') > -1`,
+      //     },
+      //   ],
+      // })
+      //   .populate('nhaHang')
+      //   .populate('loai');
+
+      foods = await Food.find({ loai: foodType._id })
         .populate('nhaHang')
         .populate('loai');
     } else {
-      total = await Food.find({
-        $where: `this.tenMon.toLowerCase().indexOf('${name.toLowerCase()}') > -1`,
-      }).count();
+      // total = await Food.find({
+      //   $where: `this.tenMon.toLowerCase().indexOf('${name.toLowerCase()}') > -1`,
+      // }).count();
 
-      foods = await Food.find({
-        $where: `this.tenMon.toLowerCase().indexOf('${name.toLowerCase()}') > -1`,
-      })
-        .populate('nhaHang')
-        .populate('loai');
+      foods = await Food.find().populate('nhaHang').populate('loai');
     }
     // .skip((q - 1) * limit)
     // .limit(limit);
 
     if (!foods) throw new Error('Có lỗi xảy ra');
 
-    return Response.success(res, { foods, total });
+    return Response.success(res, {
+      foods: foods.filter(
+        (food) => food.tenMon.toLowerCase().indexOf(name.toLowerCase()) > -1,
+      ),
+      // total,
+    });
   } catch (error) {
     console.log(error);
     return next(error);
