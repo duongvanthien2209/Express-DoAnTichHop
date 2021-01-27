@@ -1,6 +1,7 @@
 /* eslint-disable no-underscore-dangle */
 const Star = require('../models/Star');
-const User = require('../models/User');
+// const User = require('../models/User');
+const Food = require('../models/Food');
 
 const Response = require('../helpers/response.helper');
 
@@ -15,20 +16,22 @@ exports.getAll = async (req, res, next) => {
   try {
     q = parseInt(q, 10);
 
+    let foods = await Food.find({ nhaHang: restaurantManager._id });
+    if (!foods) throw new Error('Có lỗi xảy ra');
+    foods = foods.map((food) => food._id);
+
     const total = await Star.find({
-      nhaHang: restaurantManager._id,
-    })
-      .skip((q - 1) * limit)
-      .limit(limit)
-      .count();
+      monAn: { $in: foods },
+    }).count();
 
     const stars = await Star.find({
-      nhaHang: restaurantManager._id,
+      monAn: { $in: foods },
     })
+      .sort({ dateCreate: -1 })
+      .populate('monAn')
       .populate('khachHang')
       .skip((q - 1) * limit)
       .limit(limit);
-
     if (!stars) throw new Error('Có lỗi xảy ra');
 
     return Response.success(res, { stars, total });
@@ -41,17 +44,17 @@ exports.getAll = async (req, res, next) => {
 exports.create = async (req, res, next) => {
   const {
     body: { soLuong },
-    params: { userId },
-    restaurantManager,
+    params: { foodId },
+    user,
   } = req;
 
   try {
-    const user = await User.findById(userId);
-    if (!user) throw new Error('Có lỗi xảy ra');
+    const food = await Food.findById(foodId);
+    if (!food) throw new Error('Có lỗi xảy ra');
 
     const star = await Star.create({
-      soLuong,
-      nhaHang: restaurantManager._id,
+      soLuong: parseInt(soLuong, 10),
+      monAn: food._id,
       khachHang: user._id,
     });
 
@@ -68,9 +71,11 @@ exports.delete = async (req, res, next) => {
   } = req;
 
   try {
+    const star = await Star.findById(starId);
+    if (!star) throw new Error('Có lỗi xảy ra');
     await Star.findByIdAndDelete(starId);
 
-    return Response.success(res, { message: 'Xóa thành công' });
+    return Response.success(res, { star: await Star.findById(starId) });
   } catch (error) {
     console.log(error);
     return next(error);

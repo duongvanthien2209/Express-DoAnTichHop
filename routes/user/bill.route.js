@@ -6,7 +6,13 @@ const {
   getAllByUserCompleted,
   getCTBill,
   complete,
+  addFoodToBill,
 } = require('../../controllers/bill.controller');
+
+// @route   GET api/user/bill/dat1Mon/:foodId?soLuong=1,2,3,..
+// @desc    Lấy danh sách hóa đơn đã thanh toán, đã hủy
+// @access  Private
+router.get('/dat1Mon/:foodId', addFoodToBill);
 
 // @route   GET api/user/bill/completed
 // @desc    Lấy danh sách hóa đơn đã thanh toán, đã hủy

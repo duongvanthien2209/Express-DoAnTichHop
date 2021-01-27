@@ -2,9 +2,14 @@ const mongoose = require('mongoose');
 
 const StarSchema = new mongoose.Schema({
   soLuong: Number,
-  nhaHang: {
+  // nhaHang: {
+  //   type: mongoose.Schema.Types.ObjectId,
+  //   ref: 'Restaurant',
+  //   required: true,
+  // },
+  monAn: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Restaurant',
+    ref: 'Food',
     required: true,
   },
   khachHang: {

@@ -43,6 +43,7 @@ exports.getAll = async (req, res, next) => {
     const total = await Food.find().count();
 
     const foods = await Food.find()
+      .sort({ dateCreate: -1 })
       .populate('nhaHang')
       .populate('loai')
       .skip((q - 1) * limit)
@@ -85,6 +86,7 @@ exports.find = async (req, res, next) => {
   }
 };
 
+// Tìm bởi chủ cửa hàng
 exports.findByUser = async (req, res, next) => {
   let { q } = req.query;
   const { name } = req.query;
@@ -94,17 +96,21 @@ exports.findByUser = async (req, res, next) => {
     q = parseInt(q, 10);
 
     const total = await Food.find({
-      $and: {
-        $where: `this.tenMon.toLowerCase().indexOf('${name.toLowerCase()}') > -1`,
-        nhaHang: restaurant._id,
-      },
+      $and: [
+        {
+          $where: `this.tenMon.toLowerCase().indexOf('${name.toLowerCase()}') > -1`,
+        },
+        { nhaHang: restaurant._id },
+      ],
     }).count();
 
     const foods = await Food.find({
-      $and: {
-        $where: `this.tenMon.toLowerCase().indexOf('${name.toLowerCase()}') > -1`,
-        nhaHang: restaurant._id,
-      },
+      $and: [
+        {
+          $where: `this.tenMon.toLowerCase().indexOf('${name.toLowerCase()}') > -1`,
+        },
+        { nhaHang: restaurant._id },
+      ],
     })
       .skip((q - 1) * limit)
       .limit(limit);
@@ -154,6 +160,77 @@ exports.create = async (req, res, next) => {
     });
 
     return Response.success(res, { food });
+  } catch (error) {
+    console.log(error);
+    return next(error);
+  }
+};
+
+exports.update = async (req, res, next) => {
+  const {
+    file,
+    body: { tenMon, moTa, gia, loai },
+    params: { foodId },
+    restaurantManager: restaurant,
+  } = req;
+
+  try {
+    const foodType = await FoodType.findById(loai);
+    if (!foodType) throw new Error('Có lỗi xảy ra');
+
+    const food = await Food.findById(foodId);
+    if (!food) throw new Error('Có lỗi xảy ra');
+
+    if (file) {
+      let orgName = file.originalname || '';
+      orgName = orgName.trim().replace(/ /g, '-');
+      const fullPathInServ = file.path;
+      const newFullPath = `${fullPathInServ}-${orgName}`;
+      fs.rename(fullPathInServ, newFullPath);
+
+      const result = await cloudinary.uploader.upload(newFullPath);
+
+      fs.unlinkSync(newFullPath);
+
+      await Food.findByIdAndUpdate(foodId, {
+        tenMon,
+        moTa,
+        gia,
+        hinhAnh: result.url,
+        loai: foodType._id,
+        nhaHang: restaurant._id,
+      });
+    } else {
+      await Food.findByIdAndUpdate(foodId, {
+        tenMon,
+        moTa,
+        gia,
+        // hinhAnh: result.url,
+        loai: foodType._id,
+        nhaHang: restaurant._id,
+      });
+    }
+
+    return Response.success(res, {
+      food: await Food.findById(foodId).populate('nhaHang').populate('loai'),
+    });
+  } catch (error) {
+    console.log(error);
+    return next(error);
+  }
+};
+
+exports.delete = async (req, res, next) => {
+  const {
+    params: { foodId },
+  } = req;
+
+  try {
+    const food = await Food.findById(foodId);
+    if (!food) throw new Error('Có lỗi xảy ra');
+
+    await Food.findByIdAndDelete(foodId);
+    return Response.success(res, { message: 'Xóa thành công' });
   } catch (error) {
     console.log(error);
     return next(error);

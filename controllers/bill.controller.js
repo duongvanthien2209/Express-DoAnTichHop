@@ -5,8 +5,39 @@ const Bill = require('../models/Bill');
 
 const Response = require('../helpers/response.helper');
 const CTBill = require('../models/CTBill');
+const Food = require('../models/Food');
 
 const limit = 20;
+
+exports.addFoodToBill = async (req, res, next) => {
+  const {
+    params: { foodId },
+    query: { soLuong },
+    user,
+  } = req;
+
+  try {
+    const food = await Food.findById(foodId);
+    if (!food) throw new Error('Có lỗi xảy ra');
+
+    const bill = await Bill.create({
+      nhaHang: food.nhaHang,
+      khachHang: user._id,
+      total: food.gia * parseInt(soLuong, 10),
+    });
+
+    await CTBill.create({
+      soLuong: parseInt(soLuong, 10),
+      monAn: food._id,
+      hoaDon: bill._id,
+    });
+
+    return Response.success(res, { bill });
+  } catch (error) {
+    console.log(error);
+    return next(error);
+  }
+};
 
 exports.getAllByRestaurantManager = async (req, res, next) => {
   let {
@@ -19,6 +50,7 @@ exports.getAllByRestaurantManager = async (req, res, next) => {
 
     const total = await Bill.find({ nhaHang: restaurantManager._id }).count();
     const bills = await Bill.find({ nhaHang: restaurantManager._id })
+      .sort({ dateCreate: -1 })
       .populate('khachHang')
       .skip((q - 1) * limit)
       .limit(limit);
@@ -43,7 +75,9 @@ exports.getAllByUser = async (req, res, next) => {
         { khachHang: user._id },
         { isCompleted: { $in: ['đang xử lý', 'đã xác nhận'] } },
       ],
-    }).populate('nhaHang');
+    })
+      .sort({ dateCreate: -1 })
+      .populate('nhaHang');
 
     if (!bills) throw new Error('Có lỗi xảy ra');
 
@@ -65,7 +99,9 @@ exports.getAllByUserCompleted = async (req, res, next) => {
         { khachHang: user._id },
         { isCompleted: { $in: ['đã hủy', 'đã thanh toán'] } },
       ],
-    }).populate('nhaHang');
+    })
+      .sort({ dateCreate: -1 })
+      .populate('nhaHang');
 
     if (!bills) throw new Error('Có lỗi xảy ra');
 

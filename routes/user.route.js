@@ -30,4 +30,12 @@ router.use('/bill', require('./user/bill.route'));
 
 router.use(handleError);
 
+router.use('/comment', require('./user/comment.route'));
+
+router.use(handleError);
+
+router.use('/star', require('./user/star.route'));
+
+router.use(handleError);
+
 module.exports = router;

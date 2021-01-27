@@ -3,7 +3,7 @@ const express = require('express');
 const router = express.Router();
 
 const {
-  create,
+  // create,
   getAll,
   delete: currentDelete,
 } = require('../../controllers/comment.controller');
@@ -13,10 +13,10 @@ const {
 // @access  Private
 router.get('/', getAll);
 
-// @route   POST api/restaurantManager/comment/create
-// @desc    Tạo comment
-// @access  Private
-router.post('/create/:userId', create);
+// // @route   POST api/restaurantManager/comment/create
+// // @desc    Tạo comment
+// // @access  Private
+// router.post('/create/:userId', create);
 
 // @route   GET api/restaurantManager/comment/delete
 // @desc    Xóa comment
