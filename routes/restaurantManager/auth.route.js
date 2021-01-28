@@ -11,6 +11,7 @@ const {
   forgotPassword,
   resetPassword,
   update,
+  thongKe,
 } = require('../../controllers/restaurantManager/auth.controller');
 
 const { protect } = require('../../middlewares/restaurantManager/auth');
@@ -101,5 +102,10 @@ router.post(
   ],
   resetPassword,
 );
+
+// @route   POST api/restaurantManager/auth/thongKe
+// @desc    Dữ liệu thống kê
+// @access  Public
+router.get('/thongKe', protect, thongKe);
 
 module.exports = router;

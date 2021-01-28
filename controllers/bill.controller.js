@@ -1,6 +1,8 @@
+/* eslint-disable no-plusplus */
 /* eslint-disable no-await-in-loop */
 /* eslint-disable no-restricted-syntax */
 /* eslint-disable no-underscore-dangle */
+const moment = require('moment');
 const Bill = require('../models/Bill');
 
 const Response = require('../helpers/response.helper');
@@ -167,7 +169,7 @@ exports.complete = async (req, res, next) => {
     let bill = await Bill.findById(billId);
     if (!bill) throw new Error('Có lỗi xảy ra');
 
-    if (q === 'đã hủy' || q === 'đã thanh toán')
+    if (bill.isCompleted === 'đã hủy' || bill.isCompleted === 'đã thanh toán')
       throw new Error('Bạn không được phép thay đổi');
 
     bill = await Bill.findByIdAndUpdate(billId, {
@@ -193,6 +195,74 @@ exports.deleteByRestaurantManager = async (req, res, next) => {
     await CTBill.findByIdAndDelete(ctBillId);
 
     return Response.success(res, { message: 'Xóa thành công' });
+  } catch (error) {
+    console.log(error);
+    return next(error);
+  }
+};
+
+// Thống kê theo năm -> tổng tiền
+exports.thongKeByYear = async (req, res, next) => {
+  let {
+    query: { q },
+  } = req;
+
+  try {
+    q = parseInt(q, 10);
+    let bills = await Bill.find({ isCompleted: 'đã thanh toán' });
+    bills = bills.filter((bill) => moment(bill.dateCreate).year() === q);
+    if (bills.length === 0) throw new Error('Không có doanh thu trong năm');
+
+    const data = {};
+    for (let i = 1; i <= 12; i++) {
+      let tong = 0;
+      for (const bill of bills) {
+        if (moment(bill.dateCreate).month() === i - 1) tong += bill.total;
+      }
+
+      data[i] = tong;
+    }
+
+    return Response.success(res, { data });
+  } catch (error) {
+    console.log(error);
+    return next(error);
+  }
+};
+
+// Thống kê theo tháng -> ngày trong tháng
+exports.thongKeByMonth = async (req, res, next) => {
+  let {
+    query: { year, month },
+  } = req;
+
+  try {
+    year = parseInt(year, 10);
+    month = parseInt(month, 10);
+    let bills = await Bill.find({ isCompleted: 'đã thanh toán' });
+    bills = bills.filter((bill) => {
+      const date = moment(bill.dateCreate);
+      return date.year() === year && date.month() === month - 1;
+    });
+    if (bills.length === 0) throw new Error('Không có doanh thu trong tháng');
+
+    console.log(`${year}-${month - 1 < 10 ? `0${month - 1}` : month - 1}`);
+
+    const dayInMonth = moment(
+      `${year}-${month < 10 ? `0${month}` : month}`,
+      'YYYY-MM',
+    ).daysInMonth();
+    const data = {};
+    for (let i = 1; i <= dayInMonth; i++) {
+      let tong = 0;
+      for (const bill of bills) {
+        if (moment(bill.dateCreate).date() === i) tong += bill.total;
+      }
+
+      data[i] = tong;
+    }
+
+    return Response.success(res, { data });
   } catch (error) {
     console.log(error);
     return next(error);

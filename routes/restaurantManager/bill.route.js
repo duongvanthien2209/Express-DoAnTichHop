@@ -8,6 +8,8 @@ const {
   updateByRestaurantManager,
   deleteByRestaurantManager,
   getCTBill,
+  thongKeByMonth,
+  thongKeByYear,
 } = require('../../controllers/bill.controller');
 
 // @route   GET api/restaurantManager/bill?q=1
@@ -34,5 +36,15 @@ router.post('/update/:billId', updateByRestaurantManager);
 // @desc    Xóa món ăn trong hóa đơn
 // @access  Private
 router.get('/delete/:ctBillId', deleteByRestaurantManager);
+
+// @route   GET api/restaurantManager/bill/thongKe/nam?q=
+// @desc    Thống kê theo năm
+// @access  Private
+router.get('/thongKe/nam', thongKeByYear);
+
+// @route   GET api/restaurantManager/bill/thongKe/thang?year=&&month=
+// @desc    Thống kê theo tháng
+// @access  Private
+router.get('/thongke/thang', thongKeByMonth);
 
 module.exports = router;

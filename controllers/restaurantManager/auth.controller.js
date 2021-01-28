@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken');
 const { validationResult } = require('express-validator');
 const crypto = require('crypto');
 const fs = require('fs-promise');
+const moment = require('moment');
 
 const sendEmail = require('../../utils/sendEmail');
 const Response = require('../../helpers/response.helper');
@@ -14,6 +15,8 @@ const { chuanHoa } = require('../../example');
 const Restaurant = require('../../models/Restaurant');
 const RestaurantType = require('../../models/RestaurantType');
 const Token = require('../../models/Token');
+const Food = require('../../models/Food');
+const Bill = require('../../models/Bill');
 
 exports.register = async (req, res, next) => {
   const errors = validationResult(req);
@@ -308,6 +311,89 @@ exports.update = async (req, res, next) => {
 
     return Response.success(res, {
       restaurant: await Restaurant.findById(restaurantManager._id),
+    });
+  } catch (error) {
+    console.log(error);
+    return next(error);
+  }
+};
+
+exports.thongKe = async (req, res, next) => {
+  const { restaurantManager } = req;
+
+  try {
+    const now = moment();
+    const foodTotal = await Food.find({
+      nhaHang: restaurantManager._id,
+    }).count();
+
+    const dangXuLyBills = await Bill.find({
+      $and: [{ nhaHang: restaurantManager._id }, { isCompleted: 'đang xử lý' }],
+    });
+    const daXacNhanBills = await Bill.find({
+      $and: [
+        { nhaHang: restaurantManager._id },
+        { isCompleted: 'đã xác nhận' },
+      ],
+    });
+    const daHuyBills = await Bill.find({
+      $and: [{ nhaHang: restaurantManager._id }, { isCompleted: 'đã hủy' }],
+    });
+    const daThanhToanBills = await Bill.find({
+      $and: [
+        { nhaHang: restaurantManager._id },
+        { isCompleted: 'đã thanh toán' },
+      ],
+    });
+
+    const dangXuLyBillsTotal = dangXuLyBills.filter((dangXuLyBill) => {
+      const ngay = moment(dangXuLyBill.dateCreate);
+      return (
+        ngay.month() === now.month() &&
+        ngay.year() === now.year() &&
+        ngay.date() === now.date()
+      );
+    }).length;
+
+    const daXacNhanBillsTotal = daXacNhanBills.filter((daXacNhanBill) => {
+      const ngay = moment(daXacNhanBill.dateCreate);
+      return (
+        ngay.month() === now.month() &&
+        ngay.year() === now.year() &&
+        ngay.date() === now.date()
+      );
+    }).length;
+
+    const daHuyBillsTotal = daHuyBills.filter((daHuyBill) => {
+      const ngay = moment(daHuyBill.dateCreate);
+      return (
+        ngay.month() === now.month() &&
+        ngay.year() === now.year() &&
+        ngay.date() === now.date()
+      );
+    }).length;
+
+    let tong = 0;
+    const daThanhToanBillsTotal = daThanhToanBills.filter((daThanhToanBill) => {
+      const ngay = moment(daThanhToanBill.dateCreate);
+      if (
+        ngay.month() === now.month() &&
+        ngay.year() === now.year() &&
+        ngay.date() === now.date()
+      ) {
+        tong += daThanhToanBill.total;
+        return true;
+      }
+      return false;
+    }).length;
+
+    return Response.success(res, {
+      foodTotal,
+      daHuyBillsTotal,
+      daXacNhanBillsTotal,
+      dangXuLyBillsTotal,
+      daThanhToanBillsTotal,
+      total: tong,
     });
   } catch (error) {
     console.log(error);
