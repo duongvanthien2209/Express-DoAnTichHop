@@ -9,6 +9,9 @@ const Response = require('../helpers/response.helper');
 const CTBill = require('../models/CTBill');
 const Food = require('../models/Food');
 
+const { io } = require('../helpers/handleSocketIo.helper');
+const Mail = require('../models/Mail');
+
 const limit = 20;
 
 exports.addFoodToBill = async (req, res, next) => {
@@ -33,6 +36,17 @@ exports.addFoodToBill = async (req, res, next) => {
       monAn: food._id,
       hoaDon: bill._id,
     });
+
+    // Tạo thư mới của nhà hàng đó
+    await Mail.create({
+      text: `Hóa đơn của khác hàng: ${user.fullName}, mã hóa đơn: ${bill.id} đợi xác nhận`,
+      nhaHang: bill.nhaHang,
+    });
+
+    io.to(bill.nhaHang.toString()).emit(
+      'billMessage',
+      'Có yêu cầu từ khách hàng, check hóa đơn!',
+    );
 
     return Response.success(res, { bill });
   } catch (error) {
