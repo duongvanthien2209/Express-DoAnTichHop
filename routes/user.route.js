@@ -8,6 +8,8 @@ const { protect } = require('../middlewares/user/auth');
 
 router.use('/auth', require('./user/auth.route'));
 
+router.use(handleError);
+
 router.use('/restaurant', require('./user/restaurant.route'));
 
 router.use(handleError);
